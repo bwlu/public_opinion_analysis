@@ -21,12 +21,19 @@ class SimpleBaiduSpider(scrapy.Spider):
             item["UrlId"] = node.xpath("./div[1]/div/a[@href]/@href").extract_first()
             item["info"] = node.xpath('./div[2]/div[@class="threadlist_text pull_left"]/div[1]/text()').extract_first()
             item["time"] = node.xpath('./div[1]/div[2]/span[@title="创建时间"]/text()').extract_first()
-            if(isHasContent == False):#判断一页中是否有符合年限的帖子
+            # 判断一页中是否有符合年限的帖子
+            if(isHasContent == False):
                 isHasContent = self.TimeMarch(item["time"])
-
-            childUrl = "https://tieba.baidu.com" + item["UrlId"]#拼接子url
+            # 判断这个帖子是否符合时间
+            if(self.TimeMarch(item["time"])==True):
+                item["IsLimitedTime"] = 'y'
+            else:
+                item["IsLimitedTime"] = 'n'
+            # 拼接子url
+            childUrl = "https://tieba.baidu.com" + item["UrlId"]
             item["UrlId"] = childUrl
-            if item["info"] == None:#处理简介为空的情况
+            # 处理简介为空的情况
+            if item["info"] == None:
                 item["info"]= ''
             else:
                 item["info"]=item["info"].strip()#将多余空格去掉

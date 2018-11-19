@@ -15,4 +15,5 @@ class BaiduspiderItem(scrapy.Item):
     time = scrapy.Field()
     UrlId = scrapy.Field()
     childPage = scrapy.Field()
+    IsLimitedTime = scrapy.Field()#是否超过时间限制
     #读取帖子内容的属性

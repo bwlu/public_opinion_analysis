@@ -6,13 +6,13 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-
+import json
 
 class BaiduspiderSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
     # passed objects.
-
+    count = 0
     @classmethod
     def from_crawler(cls, crawler):
         # This method is used by Scrapy to create your spiders.
@@ -69,16 +69,17 @@ class BaiduspiderDownloaderMiddleware(object):
         return s
 
     def process_request(self, request, spider):
-        # Called for each request that goes through the downloader
-        # middleware.
-
-        # Must either:
-        # - return None: continue processing this request
-        # - or return a Response object
-        # - or return a Request object
-        # - or raise IgnoreRequest: process_exception() methods of
-        #   installed downloader middleware will be called
-        return None
+        # url = request.url
+        #
+        # with open("UrlList.json", "r", ) as f:
+        #     load = json.load(f)
+        # if url in load:
+        #     self.count = self.count + 1
+        #     print("???????????????????")
+        #     return request
+        # else:
+        #     print("!!!!!!!!!!!!!!!!!!!")
+            return None
 
     def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.

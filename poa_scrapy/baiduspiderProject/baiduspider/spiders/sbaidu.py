@@ -11,8 +11,6 @@ class SimpleBaiduSpider(scrapy.Spider):
     start_urls = ['https://tieba.baidu.com/f?kw='+content]
     default_scope = 1 #爬取时限
 
-
-
     def parse(self, response):
         nodelist = response.xpath('//div[@class="col2_right j_threadlist_li_right "]')#得到一页中的所有帖子
         item = BaiduspiderItem()
@@ -46,17 +44,20 @@ class SimpleBaiduSpider(scrapy.Spider):
 
     def TimeMarch(self,dataT):
         IsLimitedLable = False  # 判断是否超过默认年限
-        splits = dataT.split("-")
-        if (len(splits) == 3 or int(splits[0]) < 13):  # 如果是秒时分或月份
-            IsLimitedLable = True
-            return IsLimitedLable
+        if(dataT.count(':')>0): # 如果是秒时分
+            return True
         else:
-            nowyear = datetime.datetime.now().year
-            if((nowyear - int(splits[0]))<self.default_scope):#如果时限小于一年
+            splits = dataT.split("-")
+            if (int(splits[0]) < 13):  # 如果是月份
                 IsLimitedLable = True
                 return IsLimitedLable
-            else:#时限大于一年的话
-                return IsLimitedLable
+            else:
+                nowyear = datetime.datetime.now().year
+                if((nowyear - int(splits[0]))<self.default_scope):#如果时限小于一年
+                    IsLimitedLable = True
+                    return IsLimitedLable
+                else:#时限大于一年的话
+                    return IsLimitedLable
 
 
 

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import datetime
-import orcl_pool
+import os
+from .import orcl_pool
 from baiduspider.items import BaiduspiderItem
 
 
@@ -14,7 +15,7 @@ class SimpleBaiduSpider(scrapy.Spider):
 	
 	#取得关键字
     os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
-    op = orcl_pool()
+    op =orcl_pool.OrclPool()
     sql = "select key_word from BASE_ANALYSIS_SENTIMENT where DICT_ENABLED_VALUE=300010000000001"
     list1 = op.fetch_all(sql)
     keylist = []

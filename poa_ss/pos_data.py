@@ -37,12 +37,15 @@ def sendPartition(iter):
 		sqld += "values("+str(record[1])+",'"+record[2]+"','"+record[3]+"','"+record[4]+"'"
 		split_len = len(res['OCCUR_TIME'].split('-'))-1
 		occur_time = ""
-		if split_len==1:
-			occur_time = "%s-01 00:00:00"%res['OCCUR_TIME']
-		elif split_len==2:
-			occur_time = "%s 00:00:00"%res['OCCUR_TIME']
+		if res['OCCUR_TIME']=="":
+			occur_time = "2000-01-01 00:00:00"
 		else:
-			occur_time = "%s-01-01 00:00:00"%res['OCCUR_TIME']
+			if split_len==1:
+				occur_time = "%s-01 00:00:00"%res['OCCUR_TIME']
+			elif split_len==2:
+				occur_time = "%s 00:00:00"%res['OCCUR_TIME']
+			else:
+				occur_time = "%s-01-01 00:00:00"%res['OCCUR_TIME']
 		sqld += ",'"+res['TITLE']+"','"+res['INTRODUCTION']+"','"+res['URL']+"',to_timestamp('"+occur_time+"','yyyy-mm--dd hh24:mi:ss.ff'),"+res['ORIGIN_VALUE']+",'"+res['ORIGIN_NAME']+"') "
 		sql += sqld
 	sql += "select 1 from dual"

@@ -46,6 +46,7 @@ def sendPartition(iter):
 				occur_time = "%s 00:00:00"%res['OCCUR_TIME']
 			else:
 				occur_time = "%s-01-01 00:00:00"%res['OCCUR_TIME']
+		occur_time = "2000-01-01 00:00:00"
 		sqld += ",'"+res['TITLE']+"','"+res['INTRODUCTION']+"','"+res['URL']+"',to_timestamp('"+occur_time+"','yyyy-mm--dd hh24:mi:ss.ff'),"+res['ORIGIN_VALUE']+",'"+res['ORIGIN_NAME']+"') "
 		sql += sqld
 	sql += "select 1 from dual"

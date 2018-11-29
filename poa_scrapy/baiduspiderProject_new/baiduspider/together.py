@@ -5,7 +5,7 @@ while True:
    os.system("scrapy crawl sbaidu")
    time.sleep(10)
    os.system("scrapy crawl hhtcs")
-   timesleep(10)
+   time.sleep(10)
    os.system("scrapy crawl hhtgz")
    time.sleep(10)
    os.system("scrapy crawl hhtjl")
@@ -27,7 +27,6 @@ while True:
    os.system("scrapy crawl wszgjd")
    time.sleep(10)
    os.system("scrapy crawl wszgzh")
-   time.sleep(10)
-   os.system("scrapy crawl wxgzh")
-   os.time.sleep(1000)
+  
+   time.sleep(1000)
    

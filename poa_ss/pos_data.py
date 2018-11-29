@@ -20,9 +20,9 @@ def update_keywords():
 	return keywords
 
 def basd_info_add(sql):
+	print(sql)
 	op = OrclPool()
 	op.execute_sql(sql)
-	# print(sql)
 
 def sendPartition(iter):
 	sql = 'insert all '

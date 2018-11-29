@@ -20,8 +20,8 @@ def update_keywords():
 	return keywords
 
 def basd_info_add(sql):
-	# op = OrclPool()
-	# op.execute_sql(sql)
+	op = OrclPool()
+	op.execute_sql(sql)
 	print(sql)
 
 def sendPartition(iter):
@@ -35,7 +35,15 @@ def sendPartition(iter):
 		res = json.loads(record[0])
 		sqld = "into BASE_ANALYSIS_SENTIMENT_DETAIL(PID,NAME,MAIN_WORD,key_WORD,TITLE,INTRODUCTION,URL,OCCUR_TIME,ORIGIN_VALUE,ORIGIN_NAME) "
 		sqld += "values("+str(record[1])+",'"+record[2]+"','"+record[3]+"','"+record[4]+"'"
-		sqld += ",'"+res['TITLE']+"','"+res['INTRODUCTION']+"','"+res['URL']+"',to_timestamp('"+res['OCCUR_TIME']+"','yyyy-mm--dd hh24:mi:ss.ff'),"+res['ORIGIN_VALUE']+",'"+res['ORIGIN_NAME']+"') "
+		split_len = len(res['OCCUR_TIME'].split('-'))-1
+		occur_time = ""
+		if split_len==1:
+			occur_time = "%s-01 00:00:00"%res['OCCUR_TIME']
+		elif split_len==2:
+			occur_time = "%s 00:00:00"%res['OCCUR_TIME']
+		else:
+			occur_time = "%s-01-01 00:00:00"%res['OCCUR_TIME']
+		sqld += ",'"+res['TITLE']+"','"+res['INTRODUCTION']+"','"+res['URL']+"',to_timestamp('"+occur_time+"','yyyy-mm--dd hh24:mi:ss.ff'),"+res['ORIGIN_VALUE']+",'"+res['ORIGIN_NAME']+"') "
 		sql += sqld
 	sql += "select 1 from dual"
 	if b:

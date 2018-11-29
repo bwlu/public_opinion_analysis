@@ -4,7 +4,7 @@ from pyspark.streaming import StreamingContext
 import json
 # import functools
 from pyspark.streaming.kafka import KafkaUtils
-from pos_data import *
+from .pos_data import *
 
 class CreateSC:
 	sc = None

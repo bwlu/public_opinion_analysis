@@ -4,7 +4,6 @@
 
 import cx_Oracle as Oracle
 from DBUtils.PooledDB import PooledDB
-import configparser
 
 class OrclPool(object):
 	"""
@@ -21,9 +20,14 @@ class OrclPool(object):
 	__pool = None
 	conn = None
 	def __init__(self):
-		config = configparser.ConfigParser()
-		config.read("oracle_conn.conf")
-		self.conn = OrclPool.__get_conn(config['param'])
+		config = {
+			'host':'127.0.0.1',
+			'port':'1521',
+			'sid':'orcl',
+			'user':'pos',
+			'passwd':'pos',
+		}
+		self.conn = OrclPool.__get_conn(config)
 		self.cur = self.conn.cursor()
 
 	@staticmethod

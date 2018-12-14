@@ -52,7 +52,7 @@ def sendPartition(iter):
 			try:
 				time.strptime(occur_time,"%Y-%m-%d %H:%M:%S")
 			except:
-				export_log(res)
+				export_log({"type":"时间处理错误","data":res})
 				occur_time = "2000-01-01 00:00:00"
 			if res['INTRODUCTION'] != '':
 				res['TITLE'] = res['TITLE'].replace('\'','"')

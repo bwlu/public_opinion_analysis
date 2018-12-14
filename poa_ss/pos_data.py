@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 from orcl_pool import OrclPool
 import json
+import time
 import os
 os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
 
-__all__ = ['update_keywords','basd_info_add','sendPartition','ayls_sentence','filter_sentence']
+__all__ = ['basd_info_add','sendPartition','ayls_sentence','filter_sentence']
 
 def update_keywords():
 	keywords = []
@@ -20,42 +22,60 @@ def update_keywords():
 	return keywords
 
 def basd_info_add(sql):
-	print(sql)
-	op = OrclPool()
-	op.execute_sql(sql)
+	try:
+		op = OrclPool()
+		op.execute_sql(sql)
+		print(sql)
+	except:
+		export_log({"type":"批量插入sql","data":sql})
 
 def sendPartition(iter):
 	sql = 'insert all '
 	b = False
 	for record in iter:
-		b = True
-		# print(type(record[0]))
-		# print(record[0])
-		# print(record)
-		res = json.loads(record[0])
-		sqld = "into BASE_ANALYSIS_SENTIMENT_DETAIL(PID,NAME,MAIN_WORD,key_WORD,TITLE,INTRODUCTION,URL,OCCUR_TIME,ORIGIN_VALUE,ORIGIN_NAME) "
-		sqld += "values("+str(record[1])+",'"+record[2]+"','"+record[3]+"','"+record[4]+"'"
-		split_len = len(res['OCCUR_TIME'].split('-'))-1
-		occur_time = ""
-		if res['OCCUR_TIME']=="":
-			occur_time = "2000-01-01 00:00:00"
-		else:
-			if split_len==1:
-				occur_time = "%s-01 00:00:00"%res['OCCUR_TIME']
-			elif split_len==2:
-				occur_time = "%s 00:00:00"%res['OCCUR_TIME']
+		try:
+			b = True
+			res = json.loads(record[0])
+			sqld = "into BASE_ANALYSIS_SENTIMENT_DETAIL(PID,NAME,MAIN_WORD,key_WORD,TITLE,INTRODUCTION,URL,OCCUR_TIME,ORIGIN_VALUE,ORIGIN_NAME) "
+			sqld += "values("+str(record[1])+",'"+record[2]+"','"+record[3]+"','"+record[4]+"'"
+			split_len = len(res['OCCUR_TIME'].split('-'))-1
+			occur_time = res['OCCUR_TIME']
+			if len(occur_time)<15:
+				if split_len==1:
+					occur_time = "%s-01 00:00:00"%occur_time
+				elif split_len==2:
+					occur_time = "%s 00:00:00"%occur_time
+				else:
+					occur_time = "%s-01-01 00:00:00"%occur_time
 			else:
-				occur_time = "%s-01-01 00:00:00"%res['OCCUR_TIME']
-		occur_time = "2000-01-01 00:00:00"
-		sqld += ",'"+res['TITLE']+"','"+res['INTRODUCTION']+"','"+res['URL']+"',to_timestamp('"+occur_time+"','yyyy-mm--dd hh24:mi:ss.ff'),"+res['ORIGIN_VALUE']+",'"+res['ORIGIN_NAME']+"') "
-		sql += sqld
+				occur_time = "%s"%res['OCCUR_TIME']
+			try:
+				time.strptime(occur_time,"%Y-%m-%d %H:%M:%S")
+			except:
+				export_log(res)
+				occur_time = "2000-01-01 00:00:00"
+			if res['INTRODUCTION'] != '':
+				res['TITLE'] = res['TITLE'].replace('\'','"')
+				res['INTRODUCTION'] = res['INTRODUCTION'].replace('\'','"')
+				sqld += ",'"+res['TITLE']+"','"+res['INTRODUCTION']+"','"+res['URL']+"',to_timestamp('"+occur_time+"','yyyy-mm--dd hh24:mi:ss.ff'),"+res['ORIGIN_VALUE']+",'"+res['ORIGIN_NAME']+"') "
+				sql += sqld
+			else:
+				export_log({"type":"没有阅读权限","data":res})
+		except:
+			export_log({"type":"拼接sql","data":record[0]})
 	sql += "select 1 from dual"
 	if b:
 		basd_info_add(sql)
 	
 def ayls_sentence(sentence):
 	keywords = update_keywords()
-	# keywords = [{'id':1,'name':'户户通','main_word':'户户通,恶意,安装','key_word':['户户通','恶意','安装']}]
+	#==============================================================
+	if not os.path.exists('/tmp/log/poa/'):
+		os.makedirs('/tmp/log/poa/')
+	fp =open('/tmp/log/poa/check.log','a+')
+	fp.write('#%1')
+	fp.close()
+	#==============================================================
 	for key in keywords:
 		for kw in key['key_word']:
 			if kw in sentence[1]:
@@ -67,3 +87,13 @@ def filter_sentence(sentence):
 	if sentence[1] == 0:
 		return False
 	return True
+
+def export_log(log_info):
+	log_time = time.strftime("%Y-%m-%d", time.localtime())
+	log_time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+	if not os.path.exists('/tmp/log/log_poa/'):
+		os.makedirs('/tmp/log/log_poa/')
+	fp =open('/tmp/log/log_poa/%s.log'%log_time,'a+')
+	fp.write('%s:%s'%(log_time1,json.dumps(log_info)))
+	fp.write('\n')
+	fp.close()

@@ -21,11 +21,11 @@ class OrclPool(object):
 	conn = None
 	def __init__(self):
 		config = {
-			'host':'127.0.0.1',
+			'host':'192.168.163.21',
 			'port':'1521',
 			'sid':'orcl',
-			'user':'pos',
-			'passwd':'pos',
+			'user':'DTH_BIGDATA',
+			'passwd':'DTH_BIGDATA',
 		}
 		self.conn = OrclPool.__get_conn(config)
 		self.cur = self.conn.cursor()

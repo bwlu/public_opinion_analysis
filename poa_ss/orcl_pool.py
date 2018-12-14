@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-# @File:12345 orcl_pools.py
-# @Project:  Tools
-
 import cx_Oracle as Oracle
 from DBUtils.PooledDB import PooledDB
 

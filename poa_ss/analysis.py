@@ -9,6 +9,7 @@ try:
 	sc = SparkContext("local[*]", "analysis")
 	# sc = SparkContext(appName="analysis")
 	# sc.setLogLevel("DEBUG")
+	sc.setLogLevel("WARN")
 	# 设置时间为10秒
 	ssc = StreamingContext(sc, 10)
 	# 数据源
@@ -19,14 +20,14 @@ try:
 	# sentences = KafkaUtils.createStream(ssc, zookeeper,group_id,topic)
 
 	brokers ="192.168.163.184:6667"  
-	topic='test'
+	topic='postsarticles'
 	sentences = KafkaUtils.createDirectStream(ssc,[topic],kafkaParams={"metadata.broker.list":brokers})
-	sentences.pprint()
-	# pairs = sentences.map(lambda sentence:ayls_sentence(sentence))
-	# filters = pairs.filter(lambda sentence:filter_sentence(sentence))
-	# filters.pprint()
+	
+	pairs = sentences.map(lambda sentence:ayls_sentence(sentence))
+	filters = pairs.filter(lambda sentence:filter_sentence(sentence))
+	filters.pprint()
 
-	# filters.foreachRDD(lambda rdd: rdd.foreachPartition(sendPartition))
+	filters.foreachRDD(lambda rdd: rdd.foreachPartition(sendPartition))
 
 	ssc.start()
 	ssc.awaitTermination()

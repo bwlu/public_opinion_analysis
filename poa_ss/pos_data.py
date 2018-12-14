@@ -23,8 +23,8 @@ def update_keywords():
 
 def basd_info_add(sql):
 	try:
-		op = OrclPool()
-		op.execute_sql(sql)
+		# op = OrclPool()
+		# op.execute_sql(sql)
 		print(sql)
 	except:
 		export_log({"type":"批量插入sql","data":sql})
@@ -69,13 +69,7 @@ def sendPartition(iter):
 	
 def ayls_sentence(sentence):
 	keywords = update_keywords()
-	#==============================================================
-	if not os.path.exists('/tmp/log/poa/'):
-		os.makedirs('/tmp/log/poa/')
-	fp =open('/tmp/log/poa/check.log','a+')
-	fp.write('#%1')
-	fp.close()
-	#==============================================================
+	
 	for key in keywords:
 		for kw in key['key_word']:
 			if kw in sentence[1]:
@@ -93,7 +87,9 @@ def export_log(log_info):
 	log_time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 	if not os.path.exists('/tmp/log/log_poa/'):
 		os.makedirs('/tmp/log/log_poa/')
-	fp =open('/tmp/log/log_poa/%s.log'%log_time,'a+')
-	fp.write('%s:%s'%(log_time1,json.dumps(log_info)))
-	fp.write('\n')
-	fp.close()
+	# fp =open('/tmp/log/log_poa/%s.log'%log_time,'a+')
+	with open('/tmp/log/log_poa/%s.log'%log_time,'a+') as fp:
+		fp.write('%s:%s'%(log_time1,json.dumps(log_info,ensure_ascii=False)))
+		fp.write('\n')
+	# fp.close()
+	

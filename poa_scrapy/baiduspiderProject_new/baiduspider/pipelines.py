@@ -390,16 +390,7 @@ class BaiduspiderPipeline(object):
         dict['INTRODUCTION']=item['info']
         dict['OCCUR_TIME']=item['time']
         dict['ORIGIN_VALUE']='500010000000001'
-        print("55555555555555555555555555555555555555"+origin)
         dict['ORIGIN_NAME']='论坛'
-        #if(str(origin).startswith('hht')):
-         #   dict['ORIGIN_NAME']='户户通'
-        #elif(str(origin).startswith('jdwx')):
-         #   dict['ORIGIN_NAME']='家电维修'
-        #elif(str(origin).startswith('wszg')):
-         #   dict['ORIGIN_NAME']='卫视中国'
-        #elif(str(origin).startswith('sbaidu')):
-         #   dict['ORIGIN_NAME']='百度论坛'
         msg = json.dumps(dict,ensure_ascii=False)
         print("------------------------------------------------------------------------------------"+msg)
         producer.send('postsarticles', msg.encode('utf-8'))

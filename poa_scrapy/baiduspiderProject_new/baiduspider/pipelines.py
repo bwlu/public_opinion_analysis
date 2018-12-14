@@ -1,17 +1,8 @@
-# -*- coding: utf-8 -*-
-
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-
 import time
 import json
 from kafka import KafkaProducer   #引入包，如果你在自己的电脑上跑，得先安装kafka
 global producer
 class BaiduspiderPipeline(object):
-    maxCount = 1000 #可根据具体情况，调整存入json的id条数
-    counter = 0
 #百度列表
     urlList_baidu = []
     deltaList_baidu=[]
@@ -90,10 +81,8 @@ class BaiduspiderPipeline(object):
         if(spider.name == 'sbaidu'):
             #记录id并存在urlList
             if(item["IsLimitedTime"]=="y"):
-                if(self.counter<self.maxCount):#记录前maxCountUrl
-                    self.counter = self.counter + 1
-                    id = item['UrlId'].split('/')[4]#得到urlid
-                    self.templist_baidu.append(id)
+                id = item['UrlId'].split('/')[4]#得到urlid
+                self.templist_baidu.append(id)
                 #比对id找到增量，并存入Kafka
                 id = item['UrlId'].split('/')[4]
                 try:
@@ -107,11 +96,10 @@ class BaiduspiderPipeline(object):
                     self.Kafka_fun(item,spider.name)
         if(spider.name == 'jdwxgq'):
             if (item["IsLimitedTime"] == "y"):
-                if (self.counter < self.maxCount):  # 记录前maxCountUrl
-                    self.counter = self.counter + 1
-                    id = item['UrlId'].split('/')[3]  # 得到urlid
-                    num = id.split('-')[1]
-                    self.templist_jdwxgq.append(num)
+               
+                id = item['UrlId'].split('/')[3]  # 得到urlid
+                num = id.split('-')[1]
+                self.templist_jdwxgq.append(num)
                 # 比对id找到增量，并存入Kafka
                 id = item['UrlId'].split('/')[3]
                 num = id.split('-')[1]
@@ -126,11 +114,10 @@ class BaiduspiderPipeline(object):
                     self.Kafka_fun(item,spider.name)
         if(spider.name == 'jdwxbz'):
             if (item["IsLimitedTime"] == "y" and item['UrlId'] != None):
-                if (self.counter < self.maxCount):  # 记录前maxCountUrl
-                    self.counter = self.counter + 1
-                    id = item['UrlId'].split('/')[3]  # 得到urlid
-                    num = id.split('-')[1]
-                    self.templist_jdwxbz.append(num)
+               
+                id = item['UrlId'].split('/')[3]  # 得到urlid
+                num = id.split('-')[1]
+                self.templist_jdwxbz.append(num)
                 # 比对id找到增量，并存入Kafka
                 id = item['UrlId'].split('/')[3]
                 num = id.split('-')[1]
@@ -143,11 +130,10 @@ class BaiduspiderPipeline(object):
                     self.Kafka_fun(item,spider.name)
         if(spider.name == 'jdwxts'):
             if (item["IsLimitedTime"] == "y"):
-                if (self.counter < self.maxCount):  # 记录前maxCountUrl
-                    self.counter = self.counter + 1
-                    id = item['UrlId'].split('/')[3]  # 得到urlid
-                    num = id.split('-')[1]
-                    self.templist_jdwxts.append(num)
+               
+                id = item['UrlId'].split('/')[3]  # 得到urlid
+                num = id.split('-')[1]
+                self.templist_jdwxts.append(num)
                 # 比对id找到增量，并存入Kafka
                 id = item['UrlId'].split('/')[3]
                 num = id.split('-')[1]
@@ -160,11 +146,10 @@ class BaiduspiderPipeline(object):
                     self.Kafka_fun(item,spider.name)
         if(spider.name == 'jdwxgg'):
             if (item["IsLimitedTime"] == "y"):
-                if (self.counter < self.maxCount):  # 记录前maxCountUrl
-                    self.counter = self.counter + 1
-                    id = item['UrlId'].split('/')[3]  # 得到urlid
-                    num = id.split('-')[1]
-                    self.templist_jdwxgg.append(num)
+              
+                id = item['UrlId'].split('/')[3]  # 得到urlid
+                num = id.split('-')[1]
+                self.templist_jdwxgg.append(num)
                 # 比对id找到增量，并存入Kafka
                 id = item['UrlId'].split('/')[3]
                 num = id.split('-')[1]
@@ -179,11 +164,10 @@ class BaiduspiderPipeline(object):
                     self.Kafka_fun(item,spider.name)
         if(spider.name == 'wszgjd'):
             if (item["IsLimitedTime"] == "y"):
-                if (self.counter < self.maxCount):  # 记录前maxCountUrl
-                    self.counter = self.counter + 1
-                    id = item['UrlId'].split('/')[3]  # 得到urlid
-                    num = id.split('-')[1]
-                    self.templist_wszgjd.append(num)
+                
+                id = item['UrlId'].split('/')[3]  # 得到urlid
+                num = id.split('-')[1]
+                self.templist_wszgjd.append(num)
                 # 比对id找到增量，并存入Kafka
                 id = item['UrlId'].split('/')[3]  # 得到urlid
                 num = id.split('-')[1]
@@ -196,11 +180,10 @@ class BaiduspiderPipeline(object):
                     self.Kafka_fun(item,spider.name)
         if(spider.name == 'wszgds'):
             if (item["IsLimitedTime"] == "y"):
-                if (self.counter < self.maxCount):  # 记录前maxCountUrl
-                    self.counter = self.counter + 1
-                    id = item['UrlId'].split('/')[3]  # 得到urlid
-                    num = id.split('-')[1]
-                    self.templist_wszgds.append(num)
+                
+                id = item['UrlId'].split('/')[3]  # 得到urlid
+                num = id.split('-')[1]
+                self.templist_wszgds.append(num)
                 # 比对id找到增量，并存入Kafka
                 id = item['UrlId'].split('/')[3]  # 得到urlid
                 num = id.split('-')[1]
@@ -213,11 +196,10 @@ class BaiduspiderPipeline(object):
                     self.Kafka_fun(item,spider.name)
         if(spider.name == 'wszgcs'):
             if (item["IsLimitedTime"] == "y"):
-                if (self.counter < self.maxCount):  # 记录前maxCountUrl
-                    self.counter = self.counter + 1
-                    id = item['UrlId'].split('/')[3]  # 得到urlid
-                    num = id.split('-')[1]
-                    self.templist_wszgcs.append(num)
+               
+                id = item['UrlId'].split('/')[3]  # 得到urlid
+                num = id.split('-')[1]
+                self.templist_wszgcs.append(num)
                 # 比对id找到增量，并存入Kafka
                 id = item['UrlId'].split('/')[3]  # 得到urlid
                 num = id.split('-')[1]
@@ -230,11 +212,10 @@ class BaiduspiderPipeline(object):
                     self.Kafka_fun(item,spider.name)
         if(spider.name == 'wszgzh'):
             if (item["IsLimitedTime"] == "y"):
-                if (self.counter < self.maxCount):  # 记录前maxCountUrl
-                    self.counter = self.counter + 1
-                    id = item['UrlId'].split('/')[3]  # 得到urlid
-                    num = id.split('-')[1]
-                    self.templist_wszgzh.append(num)
+                
+                id = item['UrlId'].split('/')[3]  # 得到urlid
+                num = id.split('-')[1]
+                self.templist_wszgzh.append(num)
                 # 比对id找到增量，并存入Kafka
                 id = item['UrlId'].split('/')[3]  # 得到urlid
                 num = id.split('-')[1]
@@ -247,11 +228,10 @@ class BaiduspiderPipeline(object):
                     self.Kafka_fun(item,spider.name)
         if (spider.name == 'hhtjl'):
             if (item["IsLimitedTime"] == "y"):
-                if (self.counter < self.maxCount):  # 记录前maxCountUrl
-                    self.counter = self.counter + 1
-                    id = item['UrlId'].split('/')[3]  # 得到urlid
-                    num = id.split('-')[1]
-                    self.templist_hhtjl.append(num)
+              
+                id = item['UrlId'].split('/')[3]  # 得到urlid
+                num = id.split('-')[1]
+                self.templist_hhtjl.append(num)
                 # 比对id找到增量，并存入Kafka
                 id = item['UrlId'].split('/')[3]  # 得到urlid
                 num = id.split('-')[1]
@@ -264,11 +244,10 @@ class BaiduspiderPipeline(object):
                     self.Kafka_fun(item,spider.name)
         if (spider.name == 'hhtcs'):
             if (item["IsLimitedTime"] == "y"):
-                if (self.counter < self.maxCount):  # 记录前maxCountUrl
-                    self.counter = self.counter + 1
-                    id = item['UrlId'].split('/')[3]  # 得到urlid
-                    num = id.split('-')[1]
-                    self.templist_hhtcs.append(num)
+                
+                id = item['UrlId'].split('/')[3]  # 得到urlid
+                num = id.split('-')[1]
+                self.templist_hhtcs.append(num)
                 # 比对id找到增量，并存入Kafka
                 id = item['UrlId'].split('/')[3]  # 得到urlid
                 num = id.split('-')[1]
@@ -281,11 +260,10 @@ class BaiduspiderPipeline(object):
                     self.Kafka_fun(item,spider.name)
         if (spider.name == 'hhtxq'):
             if (item["IsLimitedTime"] == "y"):
-                if (self.counter < self.maxCount):  # 记录前maxCountUrl
-                    self.counter = self.counter + 1
-                    id = item['UrlId'].split('/')[3]  # 得到urlid
-                    num = id.split('-')[1]
-                    self.templist_hhtxq.append(num)
+                
+                id = item['UrlId'].split('/')[3]  # 得到urlid
+                num = id.split('-')[1]
+                self.templist_hhtxq.append(num)
                 # 比对id找到增量，并存入Kafka
                 id = item['UrlId'].split('/')[3]  # 得到urlid
                 num = id.split('-')[1]
@@ -298,11 +276,10 @@ class BaiduspiderPipeline(object):
                     self.Kafka_fun(item,spider.name)
         if (spider.name == 'hhtgz'):
             if (item["IsLimitedTime"] == "y"):
-                if (self.counter < self.maxCount):  # 记录前maxCountUrl
-                    self.counter = self.counter + 1
-                    id = item['UrlId'].split('/')[3]  # 得到urlid
-                    num = id.split('-')[1]
-                    self.templist_hhtgz.append(num)
+               
+                id = item['UrlId'].split('/')[3]  # 得到urlid
+                num = id.split('-')[1]
+                self.templist_hhtgz.append(num)
                 # 比对id找到增量，并存入Kafka
                 id = item['UrlId'].split('/')[3]  # 得到urlid
                 num = id.split('-')[1]

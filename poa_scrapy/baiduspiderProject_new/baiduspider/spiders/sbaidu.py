@@ -13,7 +13,7 @@ class SimpleBaiduSpider(scrapy.Spider):
     #start_urls = ['https://tieba.baidu.com/f?kw='+content]
     default_scope = 1 #爬取时限
 	
-	#取得关键字
+    #取得关键字
     os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
     op =orcl_pool.OrclPool()
     sql = "select key_word from BASE_ANALYSIS_SENTIMENT where DICT_ENABLED_VALUE=300010000000001"
@@ -30,6 +30,10 @@ class SimpleBaiduSpider(scrapy.Spider):
     keylist = set(keylist)
     keylist=list(keylist)
     urlList = []
+    print("+++++++++++++++++++++++++++keylist+++++++++")
+    print(keylist)
+    f=open('data.txt','w+')
+    f.write(str(keylist))
     for key in keylist:
         urlList.append('https://tieba.baidu.com/f?kw=' + str(key))
     # 将拼接好的字符串加入初始url

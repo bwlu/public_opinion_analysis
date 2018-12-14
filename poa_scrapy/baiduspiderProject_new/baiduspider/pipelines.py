@@ -57,7 +57,7 @@ class BaiduspiderPipeline(object):
     templist_hhtgz = []
     def __init__(self):
         global producer
-        producer = KafkaProducer(bootstrap_servers=['127.0.0.1:9092'])
+        producer = KafkaProducer(bootstrap_servers=['192.168.163.184：6667'])
   
         self.urlList_baidu = self.read_file("./jsonfile/baidu_UrlList.json")
         #家电维修
@@ -402,4 +402,4 @@ class BaiduspiderPipeline(object):
          #   dict['ORIGIN_NAME']='百度论坛'
         msg = json.dumps(dict,ensure_ascii=False)
         print("------------------------------------------------------------------------------------"+msg)
-        producer.send('test', msg.encode('utf-8'))
+        producer.send('postsarticles', msg.encode('utf-8'))

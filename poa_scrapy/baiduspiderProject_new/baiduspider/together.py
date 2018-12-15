@@ -20,15 +20,15 @@ def jdwxspider():
     os.system("scrapy crawl jdwxgq")
     time.sleep(10)
     os.system("scrapy crawl jdwxts")
-def wszgspider():
+def wszgcsspider():
     os.system("scrapy crawl wszgcs")
-    time.sleep(10)
+def wszgdsspider():
     os.system("scrapy crawl wszgds")
-    time.sleep(10)
+def wszgjdspider():
     os.system("scrapy crawl wszgjd")
-    time.sleep(10)
+def wszgzhspider():
     os.system("scrapy crawl wszgzh")
-def run():
+def run(count):
     threads = []
     t1 = threading.Thread(target=sbaiduspider)
     threads.append(t1)
@@ -36,21 +36,32 @@ def run():
     threads.append(t2)
     t3 = threading.Thread(target=jdwxspider)
     threads.append(t3)
-    t4 = threading.Thread(target=wszgspider)
-    threads.append(t4)
+    if(count==5):
+        t4 = threading.Thread(target=wszgcsspider)
+        threads.append(t4)
+        t5 = threading.Thread(target=wszgdsspider)
+        threads.append(t5)
+        t6 = threading.Thread(target=wszgjdspider)
+        threads.append(t6)
+        t7 = threading.Thread(target=wszgzhspider)
+        threads.append(t7)
     for t in threads:
         t.setDaemon(True)
         t.start()
     for t in threads:
         t.join()
-    time.sleep(100)#执行一轮后休眠时间
+    print("执行完成一轮")
+    time.sleep(30)#执行一轮后休眠时间
 
 def main():
+    count = 5
     fp = open('out_put', 'w')#用来输出错误信息
     stderr = sys.stderr
     sys.stderr = fp
     while(True):
-        run()
+        run(count)
+        if(count==5): count=0
+        count=count+1
     fp.close()
     sys.stderr = stderr
 main()

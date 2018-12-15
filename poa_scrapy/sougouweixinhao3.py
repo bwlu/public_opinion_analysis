@@ -8,7 +8,7 @@ import json
 from bs4 import BeautifulSoup
 from kafka import KafkaProducer
 import os
-from baiduspiderProject_new.baiduspider.spiders import orcl_pool
+from oraclepool import OrclPool
 
 global producer
 def GetgzhList(keyword):
@@ -151,7 +151,7 @@ def get_article(gzhList,ip):
 def getKeylist():
     # 取得关键字
     os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
-    op = orcl_pool.OrclPool()
+    op = OrclPool()
     sql = "select key_word from BASE_ANALYSIS_SENTIMENT where DICT_ENABLED_VALUE=300010000000001"
     list1 = op.fetch_all(sql)
     keylist = []

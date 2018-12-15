@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from orcl_pool import OrclPool
+from oraclepool import OrclPool
 import json
 import time
 import os
@@ -23,9 +23,9 @@ def update_keywords():
 
 def basd_info_add(sql):
 	try:
-		# op = OrclPool()
-		# op.execute_sql(sql)
-		print(sql)
+		op = OrclPool()
+		op.execute_sql(sql)
+		# print(sql)
 	except:
 		export_log({"type":"批量插入sql","data":sql})
 

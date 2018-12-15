@@ -3,7 +3,7 @@ import scrapy
 from .. import read_json
 import datetime
 import os
-from .import orcl_pool
+from oraclepool import OrclPool
 from baiduspider.items import BaiduspiderItem
 from .. import TimeCalculate
 from .. import TimeMarch
@@ -19,7 +19,7 @@ class SimpleBaiduSpider(scrapy.Spider):
 	
 	#取得关键字
     os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
-    op =orcl_pool.OrclPool()
+    op = OrclPool()
     sql = "select key_word from BASE_ANALYSIS_SENTIMENT where DICT_ENABLED_VALUE=300010000000001"
     list1 = op.fetch_all(sql)
     keylist = []

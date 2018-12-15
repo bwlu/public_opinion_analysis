@@ -1,19 +1,23 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from .. import read_json
 import datetime
 import os
 from .import orcl_pool
 from baiduspider.items import BaiduspiderItem
+from .. import TimeCalculate
+from .. import TimeMarch
 
 
 class SimpleBaiduSpider(scrapy.Spider):
     name = 'sbaidu'
-    #content = '户户通'
     allowed_domains = ['tieba.baidu.com']
-    #start_urls = ['https://tieba.baidu.com/f?kw='+content]
-    default_scope = 1 #爬取时限
+    if(read_json.read_json(name)):
+        default_scope_day = 50 #首次爬取时限
+    else:
+        default_scope_day = 30 #增量爬取时限
 	
-    #取得关键字
+	#取得关键字
     os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
     op =orcl_pool.OrclPool()
     sql = "select key_word from BASE_ANALYSIS_SENTIMENT where DICT_ENABLED_VALUE=300010000000001"
@@ -30,10 +34,6 @@ class SimpleBaiduSpider(scrapy.Spider):
     keylist = set(keylist)
     keylist=list(keylist)
     urlList = []
-    print("+++++++++++++++++++++++++++keylist+++++++++")
-    print(keylist)
-    f=open('data.txt','w+')
-    f.write(str(keylist))
     for key in keylist:
         urlList.append('https://tieba.baidu.com/f?kw=' + str(key))
     # 将拼接好的字符串加入初始url
@@ -50,11 +50,12 @@ class SimpleBaiduSpider(scrapy.Spider):
             item["UrlId"] = node.xpath("./div[1]/div/a[@href]/@href").extract_first()
             item["info"] = node.xpath('./div[2]/div[@class="threadlist_text pull_left"]/div[1]/text()').extract_first()
             item["time"] = node.xpath('./div[1]/div[2]/span[@title="创建时间"]/text()').extract_first()
+            item["time"] = item["time"] = TimeCalculate.time_calculate(item["time"], self.name)
             # 判断一页中是否有符合年限的帖子
             if(isHasContent == False):
-                isHasContent = self.TimeMarch(item["time"])
+                isHasContent = TimeMarch.time_March(item["time"],self.default_scope_day)
             # 判断这个帖子是否符合时间
-            if(self.TimeMarch(item["time"])==True):
+            if(TimeMarch.time_March(item["time"],self.default_scope_day)==True):
                 item["IsLimitedTime"] = 'y'
             else:
                 item["IsLimitedTime"] = 'n'
@@ -75,25 +76,7 @@ class SimpleBaiduSpider(scrapy.Spider):
              self.crawler.engine.close_spider(self, 'Finished')#关闭爬虫
         else:
             yield scrapy.Request(NextPageUrl,callback = self.parse)
-            print("翻页了！！！！！！！！！！！！！！！！！")
 
-
-    def TimeMarch(self,dataT):
-        IsLimitedLable = False  # 判断是否超过默认年限
-        if(dataT.count(':')>0): # 如果是秒时分
-            return True
-        else:
-            splits = dataT.split("-")
-            if (int(splits[0]) < 13):  # 如果是月份
-                IsLimitedLable = True
-                return IsLimitedLable
-            else:
-                nowyear = datetime.datetime.now().year
-                if((nowyear - int(splits[0]))<self.default_scope):#如果时限小于一年
-                    IsLimitedLable = True
-                    return IsLimitedLable
-                else:#时限大于一年的话
-                    return IsLimitedLable
 
 
 

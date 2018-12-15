@@ -57,7 +57,7 @@ class BaiduspiderPipeline(object):
     templist_hhtgz = []
     def __init__(self):
         global producer
-        producer = KafkaProducer(bootstrap_servers=['192.168.163.184：6667'])
+        producer = KafkaProducer(bootstrap_servers=['192.168.163.184:6667'])
   
         self.urlList_baidu = self.read_file("./jsonfile/baidu_UrlList.json")
         #家电维修
@@ -87,11 +87,9 @@ class BaiduspiderPipeline(object):
                 id = item['UrlId'].split('/')[4]
                 try:
                     if id not in self.urlList_baidu:
-                        print("111111111111111111111111111111111111111111111111")
                         self.deltaList_baidu.append(id)
                         self.Kafka_fun(item,spider.name)
                 except:
-                    print(22222222222222222222222222222222)
                     self.deltaList_baidu.append(id)
                     self.Kafka_fun(item,spider.name)
         if(spider.name == 'jdwxgq'):
@@ -105,11 +103,9 @@ class BaiduspiderPipeline(object):
                 num = id.split('-')[1]
                 try:#首次添加的异常处理
                     if num not in self.urlList_jdwxgq:
-                        print("111111111111111111111111111111111111111111111111")
                         self.deltaList_jdwxgq.append(num)
                         self.Kafka_fun(item,spider.name)
                 except:
-                    print(22222222222222222222222222222222)
                     self.deltaList_jdwxgq.append(num)
                     self.Kafka_fun(item,spider.name)
         if(spider.name == 'jdwxbz'):
@@ -155,11 +151,9 @@ class BaiduspiderPipeline(object):
                 num = id.split('-')[1]
                 try:  # 首次添加的异常处理
                     if num not in self.urlList_jdwxgg:
-                        print("1111111111111111111111111111111")
                         self.deltaList_jdwxgg.append(num)
                         self.Kafka_fun(item,spider.name)
                 except:
-                    print("22222222222222222222222")
                     self.deltaList_jdwxgg.append(num)
                     self.Kafka_fun(item,spider.name)
         if(spider.name == 'wszgjd'):
@@ -392,5 +386,4 @@ class BaiduspiderPipeline(object):
         dict['ORIGIN_VALUE']='500010000000001'
         dict['ORIGIN_NAME']='论坛'
         msg = json.dumps(dict,ensure_ascii=False)
-        print("------------------------------------------------------------------------------------"+msg)
         producer.send('postsarticles', msg.encode('utf-8'))

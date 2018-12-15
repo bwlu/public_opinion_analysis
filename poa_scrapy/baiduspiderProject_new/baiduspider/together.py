@@ -43,18 +43,14 @@ def run():
         t.start()
     for t in threads:
         t.join()
-    print("执行完成一轮")
     time.sleep(100)#执行一轮后休眠时间
 
 def main():
-    count = 0
     fp = open('out_put', 'w')#用来输出错误信息
     stderr = sys.stderr
     sys.stderr = fp
     while(True):
         run()
-        count=count+1
-        print(str(count)+'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     fp.close()
     sys.stderr = stderr
 main()

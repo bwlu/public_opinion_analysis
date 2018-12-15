@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+
 import cx_Oracle as Oracle
 from DBUtils.PooledDB import PooledDB
-
 class OrclPool(object):
 	"""
 	这里封装了一些有关oracle连接池的功能
@@ -26,7 +26,6 @@ class OrclPool(object):
 		}
 		self.conn = OrclPool.__get_conn(config)
 		self.cur = self.conn.cursor()
-
 	@staticmethod
 	def __get_conn(conf):
 		if OrclPool.__pool is None:
@@ -40,7 +39,6 @@ class OrclPool(object):
 			OrclPool.__pool = PooledDB(Oracle, user=conf['user'], password=conf['passwd'], dsn=dsn,
 										mincached=5, maxcached=30)
 		return OrclPool.__pool.connection()
-
 	def execute_sql(self, sql, args=None):
 		"""
 		执行sql语句
@@ -53,7 +51,6 @@ class OrclPool(object):
 		else:
 			self.cur.execute(sql)
 		self.conn.commit();
-
 	def fetch_all(self, sql, args=None):
 		"""
 		获取全部结果
@@ -66,7 +63,6 @@ class OrclPool(object):
 		else:
 			self.cur.execute(sql)
 		return self.cur.fetchall()
-
 	def __del__(self):
 		if self.conn != None:
 			self.conn.close()

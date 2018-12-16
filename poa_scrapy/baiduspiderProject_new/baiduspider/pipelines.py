@@ -1,5 +1,6 @@
 import time
 import json
+import os
 from kafka import KafkaProducer   #引入包，如果你在自己的电脑上跑，得先安装kafka
 global producer
 class BaiduspiderPipeline(object):
@@ -377,13 +378,24 @@ class BaiduspiderPipeline(object):
             self.write_file(path,[])
     def Kafka_fun(self,item,origin):
         global producer
-        
-        dict = {'TITLE':'','INTRODUCTION':'','ORIGIN_VALUE':'','ORIGIN_NAME':'','OCCUR_TIME':'','URL':''}
-        dict['TITLE']=item['title']
-        dict['URL']=item['UrlId']
-        dict['INTRODUCTION']=item['info']
-        dict['OCCUR_TIME']=item['time']
-        dict['ORIGIN_VALUE']='500010000000001'
-        dict['ORIGIN_NAME']='论坛'
-        msg = json.dumps(dict,ensure_ascii=False)
-        producer.send('postsarticles', msg.encode('utf-8'))
+        try:
+            dict = {'TITLE':'','INTRODUCTION':'','ORIGIN_VALUE':'','ORIGIN_NAME':'','OCCUR_TIME':'','URL':''}
+            dict['TITLE']=item['title'][:50]
+            dict['URL']=item['UrlId']
+            dict['INTRODUCTION']=item['info'][:400]
+            dict['OCCUR_TIME']=item['time']
+            dict['ORIGIN_VALUE']='500010000000001'
+            dict['ORIGIN_NAME']='论坛'
+            msg = json.dumps(dict,ensure_ascii=False)
+            producer.send('postsarticles', msg.encode('utf-8'))
+        except Exception as e:
+            self.export_log({"type":"producer","data":dict,"exception":str(e)})
+
+    def export_log(log_info):
+        log_time = time.strftime("%Y-%m-%d", time.localtime())
+        log_time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        if not os.path.exists('/tmp/log/log_poa/'):
+            os.makedirs('/tmp/log/log_poa/')
+        with open('/tmp/log/log_poa/kafka-%s.log'%log_time,'a+') as fp:
+            fp.write('%s:%s'%(log_time1,json.dumps(log_info,ensure_ascii=False)))
+            fp.write('\n')

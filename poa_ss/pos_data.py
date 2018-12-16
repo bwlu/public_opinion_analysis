@@ -26,8 +26,8 @@ def basd_info_add(sql):
 		op = OrclPool()
 		op.execute_sql(sql)
 		# print(sql)
-	except:
-		export_log({"type":"批量插入sql","data":sql})
+	except Exception as e:
+		export_log({"type":"批量插入sql","data":sql,"exception":str(e)})
 
 def sendPartition(iter):
 	sql = 'insert all '
@@ -88,7 +88,7 @@ def export_log(log_info):
 	if not os.path.exists('/tmp/log/log_poa/'):
 		os.makedirs('/tmp/log/log_poa/')
 	# fp =open('/tmp/log/log_poa/%s.log'%log_time,'a+')
-	with open('/tmp/log/log_poa/%s.log'%log_time,'a+') as fp:
+	with open('/tmp/log/log_poa/streaming-%s.log'%log_time,'a+') as fp:
 		fp.write('%s:%s'%(log_time1,json.dumps(log_info,ensure_ascii=False)))
 		fp.write('\n')
 	# fp.close()

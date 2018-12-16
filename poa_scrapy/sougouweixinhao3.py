@@ -71,7 +71,7 @@ def get_ip():
         except:
             IP = ip_list[0]
         try:
-            page = requests.get("http://www.baidu.com", headers=headers, proxies=IP)  # 测试用网站
+            page = requests.get("http://www.baidu.com", headers=headers, proxies=IP，timeout=2)  # 测试用网站
             timer = timer + 1
         except:
             isUseful = False

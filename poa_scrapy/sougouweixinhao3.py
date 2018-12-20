@@ -116,7 +116,7 @@ def get_data(listDic,mode):#1公众号列表 2文章列表
                 'title': art['title'],
                 'info': art['abstract'],
                 'time': t,
-                'url': art['cover']
+                'url': art['content_url']
             }
             itemList.append(dic)
     return itemList
@@ -188,7 +188,7 @@ def getKeylist():
 
 def run():
     global producer
-    producer = KafkaProducer(bootstrap_servers=['127.0.0.1:9092'])
+    producer = KafkaProducer(bootstrap_servers=['192.168.163.184:6667'])
     title_list = []#最终的文章列表
     if(get_ip()==False):
         print("无法获得代理")
@@ -200,7 +200,7 @@ def run():
               {'title': '4', 'info': '44', 'time': '1', 'url': '1'},
               {'title': '5', 'info': '55', 'time': '1', 'url': '1'}]
     keylist = getKeylist()
-    keylist = ['郑州','户户通']
+    keylist = ['杨主任','户户通']
     for key in keylist:
         tempList=GetgzhList(key)#得到公众号列表
         gzhList = tempList[0]
@@ -236,11 +236,11 @@ def Kafka_fun(art):
         t = time.strftime("%Y-%m-%d %H:%M:%S",localtime)
         dict['OCCUR_TIME']=t
         dict['ORIGIN_VALUE']='500010000000002'
-        dict['ORIGIN_NAME']='文章'
+        dict['ORIGIN_NAME']='微信'
         
         msg = json.dumps(dict,ensure_ascii=False)
         print("------------------------------------------------------------------------------------"+msg)
-        producer.send('test', msg.encode('utf-8'))
+        producer.send('postsarticles', msg.encode('utf-8'))
 
 			
 #以下为运行所用代码

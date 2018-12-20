@@ -17,24 +17,28 @@ def GetgzhList(keyword):
     count=0
     while(isSucess==False and count<mostTryCounts):
         count = count +1
-        ip = get_ip()#得到代理IP列表
-        try:
-            ws_api = wechatsogou.WechatSogouAPI(proxies=ip,timeout=20)
-            itemList=[]
-            itemList =get_data(ws_api.search_gzh(keyword),1)#得到数据，并转换数据
-            print("返回后列表长度:"+ str(len(itemList)))
-            if(len(itemList)!=0):
-                isSucess=True
+        iplist  = read_Proxies()#得到代理IP列表
+        itemList = []
+        IP={}
+        for ip in iplist:
+            try:
+                ws_api = wechatsogou.WechatSogouAPI(proxies=ip,timeout=20)
 
-        except:
-            print("访问出错")
-            continue
-
+                itemList =get_data(ws_api.search_gzh(keyword),1)#得到数据，并转换数据
+                print("返回后列表长度:"+ str(len(itemList)))
+                if(len(itemList)!=0):
+                    IP = ip
+                    isSucess=True
+                    break
+            except:
+                print("访问出错")
+                continue
     if(isSucess==False):
-        print("ERROR")
+        print("ERROR"+" 可能关键字不存在")
+
     else:
         print("SUCESS")
-        return [itemList,ip,keyword]
+        return [itemList,IP,keyword]
 #被弃用IP
 def get_ip():
     """ 从代理网站上获取代理"""
@@ -47,8 +51,9 @@ def get_ip():
         page = requests.get(url, headers=headers)
     except:
         print("请求ip失败")
+        return False
     soup = BeautifulSoup(page.text, 'lxml')
-    ul_list = soup.find_all('tr', limit=20)#limit=30
+    ul_list = soup.find_all('tr', limit=30)#limit=30
     print("IP池ip个数为："+ str(len(ul_list)))
     for i in range(2, len(ul_list)):
         line = ul_list[i].find_all('td')
@@ -58,36 +63,41 @@ def get_ip():
         proxy = get_proxy(address)
         ip_list.append(proxy)
     #以下测试IP
-    isUseful = False
-    timer = 0  # 防止死循环
-    while (isUseful == False):  # 测试IP是否可用
-        if timer > 20:
-            print("ip池不可用")
-            return
-        try:
-            r = random.randint(0, len(ul_list)-1)
-            print("正在使用"+str(r)+"号IP")
-            IP = ip_list[r]
-        except:
-            IP = ip_list[0]
-        try:
-            page = requests.get("http://www.baidu.com", headers=headers, proxies=IP，timeout=2)  # 测试用网站
-            timer = timer + 1
-        except:
-            isUseful = False
-            print("Ip不可用")
-        else:
-            isUseful = True
-            usefulIP = IP
-    print("IP可用")
-    return usefulIP
+    usefulIPlist = []
 
+    for ip in ip_list:
+        try:
+            page = requests.get("http://www.baidu.com", headers=headers, proxies=ip,timeout=2)  # 测试用网站
+            print("ip可用")
+            usefulIPlist.append(ip)
+        except:
+            print("Ip不可用")
+    if(len(usefulIPlist)==0) :
+        print("ip获取失败")
+        writeProxies([])
+    else:
+        print("IP可用")
+        writeProxies(usefulIPlist)
+    return True
 def get_proxy(aip):
     """构建格式化的单个proxies"""
     proxy_ip = 'http://' + aip
     proxy_ips = 'https://' + aip
     proxy = {"http": proxy_ip, "https": proxy_ips}
     return proxy
+def writeProxies(proxies):
+    f = open("proxies.json", "w", encoding='UTF-8')
+    content = json.dumps(proxies, ensure_ascii=False)
+    f.write(content)
+    print("写入完成")
+    f.close()
+def read_Proxies():
+    try:
+        f = open('proxies.json', "r", encoding='UTF-8')  # 读取josn中的上次的链接
+        return json.load(f)  # 将数据存入列表
+    except:
+        print("文件不存在")
+        return []
 
 def get_data(listDic,mode):#1公众号列表 2文章列表
     print("获取列表长度:"+str(len(listDic)))
@@ -99,7 +109,7 @@ def get_data(listDic,mode):#1公众号列表 2文章列表
     if mode == 2:
         listArticle = listDic['article']
         for art in listArticle:
-            self.Kafka_fun(art)
+            Kafka_fun(art)
             localtime =time.localtime(art['datetime'])
             t = time.strftime("%Y-%m-%d %H:%M:%S",localtime)
             dic = {
@@ -113,37 +123,45 @@ def get_data(listDic,mode):#1公众号列表 2文章列表
 
 def get_article(gzhList,ip):
     articleList = []
+    iplist = read_Proxies()
     deltaList = []
-    count = 0
-    maxConut=5
+    maxConut=1
     titleList = read_file("./baiduspiderProject_new/baiduspider/jsonfile/sougou.json")
     for gzh in gzhList:
         keyword = gzh
         count=0
+        isSuccess= False
         while(1):
-            try:
-                if(count>maxConut):
-                    print("尽力了，文章被封锁了！")#封锁后直接返回已爬取的
+            for ip in iplist:
+                try:
+                    ws_api = wechatsogou.WechatSogouAPI(proxies=ip, timeout=10)
+                    itemList = get_data(ws_api.get_gzh_article_by_history(keyword), 2)  # 得到数据，并转换数据
+                    print("返回后文章列表长度:" + str(len(itemList)))
+                    for art in itemList:
+                        print(art)
+                        articleList.append(art)#存入文章列表
+                        if art['title'] not in titleList:
+                            #
+                            # 增量,在此处存入消息队列
+                            #
+                            deltaList.append(art['title'])
+                    print("下一组文章")
+                    isSuccess =True
+                    break
+                except:
+                    print("文章访问出错")
+                    continue
+            if(isSuccess==False):
+                count = count + 1
+                if (count > maxConut):
+                    print("尽力了，文章被封锁了！")  # 封锁后直接返回已爬取的
                     write_file("./baiduspiderProject_new/baiduspider/jsonfile/sougou_delta.json", deltaList)
                     return articleList
-                ws_api = wechatsogou.WechatSogouAPI(proxies=ip, timeout=10)
-                itemList = get_data(ws_api.get_gzh_article_by_history(keyword), 2)  # 得到数据，并转换数据
-                print("返回后文章列表长度:" + str(len(itemList)))
-                for art in itemList:
-                    print(art)
-                    articleList.append(art)#存入文章列表
-                    if art['title'] not in titleList:
-                        #
-                        # 增量,在此处存入消息队列
-                        #
-                        deltaList.append(art['title'])
-                print("下一组文章")
+                else:
+                    get_ip()  # 得到代理IP列表
+                    continue
+            else:
                 break
-            except:
-                print("文章访问出错")
-                count = count + 1
-                ip = get_ip()  # 得到代理IP列表
-                continue
     write_file("./baiduspiderProject_new/baiduspider/jsonfile/sougou_delta.json", deltaList)
     print("Finish")
     return articleList
@@ -166,18 +184,23 @@ def getKeylist():
     keylist = set(keylist)
     keylist = list(keylist)
     return keylist
-	
+
+
 def run():
     global producer
     producer = KafkaProducer(bootstrap_servers=['127.0.0.1:9092'])
-	
     title_list = []#最终的文章列表
+    if(get_ip()==False):
+        print("无法获得代理")
+        return
+
     testlist=[{'title': '1', 'info': '11', 'time': '1', 'url': '1'},#测试用数据
               {'title': '2', 'info': '22', 'time': '1', 'url': '1'},
               {'title': '3', 'info': '33', 'time': '1', 'url': '1'},
               {'title': '4', 'info': '44', 'time': '1', 'url': '1'},
               {'title': '5', 'info': '55', 'time': '1', 'url': '1'}]
     keylist = getKeylist()
+    keylist = ['郑州','户户通']
     for key in keylist:
         tempList=GetgzhList(key)#得到公众号列表
         gzhList = tempList[0]
@@ -202,7 +225,7 @@ def read_file(path):
         except:
             write_file(path,[])
 			
-def Kafka_fun(self,art):
+def Kafka_fun(art):
         global producer
         
         dict = {'TITLE':'','INTRODUCTION':'','ORIGIN_VALUE':'','ORIGIN_NAME':'','OCCUR_TIME':'','URL':''}

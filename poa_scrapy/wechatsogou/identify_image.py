@@ -3,8 +3,11 @@
 from __future__ import absolute_import, unicode_literals, print_function
 
 import time
-
 import requests
+import json
+import random
+from bs4 import BeautifulSoup
+import base64
 
 from wechatsogou.five import readimg, input
 from wechatsogou.filecache import WechatCache
@@ -13,51 +16,44 @@ from wechatsogou.exceptions import WechatSogouVcodeOcrException
 ws_cache = WechatCache()
 
 ###########################################
-def get_verify_code(im, typeid):
-
+def get_verify_code(im, typeid,is_four=False):
+    print('===============验证码=================')
     verify_code = '****'
-    url = 'http://api.ruokuai.com/create.json'
+    url = "http://op.juhe.cn/vercode/index"
+    encodestr = base64.b64encode(im)
     params = {
-        'typeid': typeid,
-        'timeout': 60,
-        'username': 'qili_spring',  # 用户名
-        'password': 'liu19981124',  # 密码
-        'softid': '117460',  # 软件Id
-        'softkey': '375e3ded6ed74def977e6504284a5ab5'  # 软件Key
+        "key":'a860b43d70a7a87a76bf4807c37ade9e',  #您申请到的APPKEY
+        "codeType":typeid,  #验证码的类型
+        "base64Str":encodestr,  #图片文件
+        "dtype":"",  #返回的数据的格式，json或xml，默认为json
     }
-    files = {
-        'image': ('a.jpg', im)
-    }
-    headers = {
-        'Connection': 'Keep-Alive',
-        'Expect': '100-continue',
-        'User-Agent': 'ben'
-    }
+    global resp_code
     try:
-        resp = requests.post(url, data=params, files=files, headers=headers)
+        resp_code = requests.post(url, data=params, timeout=6)
+    except requests.exceptions.ReadTimeout as e:
+        print('get_verify_code error: ', e)
+        if is_four == True:
+            return verify_code
+        get_verify_code(im, 1004,is_four=True)
     except Exception as e:
-        print
-        'get_verify_code error: ', e
+        print('get_verify_code error: ', e)
         return verify_code
     try:
-        verify_code = resp.json().get('Result', '')
+        result = resp_code.json()
+        error_code = result["error_code"]
+        if error_code == 0:
+            #成功请求
+            verify_code = result["result"]
+            print(verify_code)
+        else:
+            print("error:%s:%s"%(result["error_code"],result["reason"]))
     except Exception as e:
-        print
-        'get_verify_code failed: ', e
-        return verify_code
-    if not verify_code:
-        try:
-            print
-            resp.text
-        except:
-            print
-            'verify code resp is None'
-
+        print('get_verify_code failed: ', e)
     return verify_code
 
 
 def identify_image_callback(self, img):
-    code = get_verify_code(img, 3060)
+    code = get_verify_code(img,1006,is_four=False)
     return code
 ###############################################
 
@@ -76,7 +72,7 @@ def identify_image_callback_by_hand(img):
     """
     # im = readimg(img)
     # im.show()
-    code = get_verify_code(img, 3060)
+    code = get_verify_code(img,1006,is_four=False)
     return code
 
 
@@ -120,8 +116,8 @@ def unlock_sogou_callback_example(url, req, resp, img, identify_image_callback):
     if not r_unlock.ok:
         raise WechatSogouVcodeOcrException(
             'unlock[{}] failed: {}'.format(unlock_url, r_unlock.text, r_unlock.status_code))
-	print(data)
-	print(r_unlock.json())
+    print(data)
+    print(r_unlock.json())
     return r_unlock.json()
 
 

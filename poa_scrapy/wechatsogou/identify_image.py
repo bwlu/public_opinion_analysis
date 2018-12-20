@@ -44,7 +44,7 @@ def get_verify_code(im, typeid,is_four=False):
         if error_code == 0:
             #成功请求
             verify_code = result["result"]
-            print(verify_code)
+            print('verify_code:%s'%verify_code)
         else:
             print("error:%s:%s"%(result["error_code"],result["reason"]))
     except Exception as e:
@@ -116,6 +116,7 @@ def unlock_sogou_callback_example(url, req, resp, img, identify_image_callback):
     if not r_unlock.ok:
         raise WechatSogouVcodeOcrException(
             'unlock[{}] failed: {}'.format(unlock_url, r_unlock.text, r_unlock.status_code))
+    print('-----------------')
     print(data)
     print(r_unlock.json())
     return r_unlock.json()
@@ -162,5 +163,7 @@ def unlock_weixin_callback_example(url, req, resp, img, identify_image_callback)
     if not r_unlock.ok:
         raise WechatSogouVcodeOcrException(
             'unlock[{}] failed: {}[{}]'.format(unlock_url, r_unlock.text, r_unlock.status_code))
-
+    print('--------========---------')
+    print(data)
+    print(r_unlock.json())
     return r_unlock.json()

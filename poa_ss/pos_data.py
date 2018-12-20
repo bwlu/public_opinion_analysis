@@ -25,9 +25,11 @@ def basd_info_add(sql):
 	try:
 		op = OrclPool()
 		op.execute_sql(sql)
+		print('插入数据库')
 		# print(sql)
 	except Exception as e:
-		export_log({"type":"批量插入sql","data":sql,"exception":str(e)})
+		if sql != 'insert all select 1 from dual'
+			export_log({"type":"批量插入sql","data":sql,"exception":str(e)})
 
 def sendPartition(iter):
 	sql = 'insert all '
@@ -60,7 +62,10 @@ def sendPartition(iter):
 				sqld += ",'"+res['TITLE']+"','"+res['INTRODUCTION']+"','"+res['URL']+"',to_timestamp('"+occur_time+"','yyyy-mm--dd hh24:mi:ss.ff'),"+res['ORIGIN_VALUE']+",'"+res['ORIGIN_NAME']+"') "
 				sql += sqld
 			else:
-				export_log({"type":"没有阅读权限","data":res})
+				if res['ORIGIN_VALUE'] == '500010000000002'
+					export_log({"type":"没有简介","data":res})
+				else:
+					export_log({"type":"没有阅读权限","data":res})
 		except:
 			export_log({"type":"拼接sql","data":record[0]})
 	sql += "select 1 from dual"

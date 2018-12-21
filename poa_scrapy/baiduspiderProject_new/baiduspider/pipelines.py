@@ -387,6 +387,8 @@ class BaiduspiderPipeline(object):
             dict['ORIGIN_VALUE']='500010000000001'
             dict['ORIGIN_NAME']='论坛'
             msg = json.dumps(dict,ensure_ascii=False)
+            print('========================================')
+            print(msg)
             producer.send('postsarticles', msg.encode('utf-8'))
         except Exception as e:
             self.export_log({"type":"producer","data":dict,"exception":str(e)})

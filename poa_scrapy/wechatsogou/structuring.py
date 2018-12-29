@@ -71,6 +71,11 @@ class WechatSogouStructuring(object):
 
         page = etree.HTML(text)
         lis = page.xpath('//ul[@class="news-list2"]/li')
+        NextPage = page.xpath('//*[@id="sogou_next"]/text()')
+        if (NextPage != []):
+            isFinaly = False
+        else:
+            isFinaly = True
         relist = []
         for li in lis:
             url = get_first_of_element(li, 'div/div[1]/a/@href')
@@ -91,6 +96,7 @@ class WechatSogouStructuring(object):
                 'authentication': authentication,
                 'post_perm': -1,
                 'view_perm': -1,
+                'isFinaly' : isFinaly
             })
 
         if post_view_perms:
@@ -100,8 +106,8 @@ class WechatSogouStructuring(object):
                     if len(post_view_perm) == 2:
                         i['post_perm'] = int(post_view_perm[0])
                         i['view_perm'] = int(post_view_perm[1])
-        return relist
 
+        return relist
     @staticmethod
     def get_article_by_search_wap(keyword, wap_dict):
         datas = []

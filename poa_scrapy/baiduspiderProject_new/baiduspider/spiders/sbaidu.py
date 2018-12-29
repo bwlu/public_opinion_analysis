@@ -11,7 +11,10 @@ from .. import TimeMarch
 
 class SimpleBaiduSpider(scrapy.Spider):
     name = 'sbaidu'
+    #content = '户户通'
+    default_scope_day = 365  # 爬取时限(日)
     allowed_domains = ['tieba.baidu.com']
+    #start_urls = ['https://tieba.baidu.com/f?kw='+content]
     if(read_json.read_json(name)):
         default_scope_day = 50 #首次爬取时限
     else:
@@ -19,7 +22,7 @@ class SimpleBaiduSpider(scrapy.Spider):
 	
 	#取得关键字
     os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
-    op = OrclPool()
+    op =OrclPool()
     sql = "select key_word from BASE_ANALYSIS_SENTIMENT where DICT_ENABLED_VALUE=300010000000001"
     list1 = op.fetch_all(sql)
     keylist = []
@@ -68,17 +71,27 @@ class SimpleBaiduSpider(scrapy.Spider):
             else:
                 item["info"]=item["info"].strip()#将多余空格去掉
             item["time"] = item["time"].strip()
-            if(NextPageUrl == ''):#记录下一页的链接
-                NextPageUrl = 'https:'+ response.xpath('//a[@class = "next pagination-item "]/@href').extract_first()
+            try:
+                if (NextPageUrl == ''):  # 记录下一页的链接
+                    NextPageUrl = 'https:' + response.xpath('//a[@class = "next pagination-item "]/@href').extract_first()
+            except:
+                url = response.url
+                print("url is :----------"+url)
+                temp = url.split("kw=")[1]
+                keyword = temp.split("&")[0]
+                if ("page" not in url):
+                    NextPageUrl = "https://tieba.baidu.com/f?kw=" + keyword + "&ie=utf-8&pn=50"
+                else:
+                    page = temp.split("pn=")[1]
+                    page = int(page)+50
+                    NextPageUrl = "https://tieba.baidu.com/f?kw=" + keyword + "&ie=utf-8&pn="+str(page)
 
             yield item #返回数据到pipeline
         if(isHasContent==False):#根据判断决定继续爬取还是结束
              self.crawler.engine.close_spider(self, 'Finished')#关闭爬虫
         else:
             yield scrapy.Request(NextPageUrl,callback = self.parse)
-
-
-
+            print("翻页了！！！！！！！！！！！！！！！！！")
 
 
 

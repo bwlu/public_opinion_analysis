@@ -116,9 +116,7 @@ def unlock_sogou_callback_example(url, req, resp, img, identify_image_callback):
     if not r_unlock.ok:
         raise WechatSogouVcodeOcrException(
             'unlock[{}] failed: {}'.format(unlock_url, r_unlock.text, r_unlock.status_code))
-    print('-----------------')
-    print(data)
-    print(r_unlock.json())
+
     return r_unlock.json()
 
 
@@ -163,7 +161,5 @@ def unlock_weixin_callback_example(url, req, resp, img, identify_image_callback)
     if not r_unlock.ok:
         raise WechatSogouVcodeOcrException(
             'unlock[{}] failed: {}[{}]'.format(unlock_url, r_unlock.text, r_unlock.status_code))
-    print('--------========---------')
-    print(data)
-    print(r_unlock.json())
+    
     return r_unlock.json()

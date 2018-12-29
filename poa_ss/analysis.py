@@ -13,11 +13,6 @@ try:
 	# 设置时间为10秒
 	ssc = StreamingContext(sc, 10)
 	# 数据源
-	
-	# zookeeper = '192.168.163.184:2181'
-	# group_id = 'test-consumer-group'
-	# topic = {'test':0}
-	# sentences = KafkaUtils.createStream(ssc, zookeeper,group_id,topic)
 
 	brokers ="192.168.163.184:6667"  
 	topic='postsarticles'

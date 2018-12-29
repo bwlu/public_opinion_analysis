@@ -25,12 +25,22 @@ def GetgzhList(keyword, page):
         IP = {}
         ss = 0 # 成功的次数
         ff = 0 # 不成功的次数
+        isFinaly =False
         for ip in iplist:
             try:
                 ws_api = wechatsogou.WechatSogouAPI(proxies=ip, timeout=5)
-                itemList = get_data(ws_api.search_gzh(keyword, page=page), 1)  # 得到数据，并转换数据
+                tempList = ws_api.search_gzh(keyword, page=page)
+                itemList = get_data(tempList, 1)  # 数据列表
+                if (tempList != []):
+                    label = tempList[0]  # 判断是否最后一页的标志量
+                    isFinaly = label['isFinaly']
+                    print('!!!!!!!!!!!!!' + str(isFinaly))
                 print("返回后公众号列表长度:" + str(len(itemList)))
                 ss = ss+1
+                if (len(itemList) != 0 and isFinaly == True):
+                    print("已经爬到最后一页")
+                    isSucess = True
+                    break
                 if (len(itemList) != 0):
                     IP = ip
                     isSucess = True
@@ -47,7 +57,7 @@ def GetgzhList(keyword, page):
         print("ERROR" + " 可能关键字不存在或者已经爬到最后一页")
     else:
         print("SUCESS")
-        return [itemList, IP, keyword]
+        return [itemList, isFinaly]
 
 # 检测ip是否失效
 def check_ip(ips):
@@ -233,7 +243,7 @@ def get_article(gzh):
                 for art in itemList:
                     print(art['title'])
                     articleList.append(art)  # 存入文章列表
-                    if art['title'] not in titleList:
+                    if art['title']+" "+art['time'] not in titleList:
                         #
                         # 增量,在此处存入消息队列
                         Kafka_fun(art)
@@ -311,6 +321,7 @@ def run():
                 {'title': '4', 'info': '44', 'time': '1', 'url': '1'},
                 {'title': '5', 'info': '55', 'time': '1', 'url': '1'}]
     keylist = getKeylist()
+    keylist = ['杨主任']
     # gzhList = []
     for key in keylist:
         # 处理公众号
@@ -325,12 +336,13 @@ def run():
             except:
                 isEnd = True
                 break
+            isEnd = tempList[1]  # 是否爬到尾页
             for gzh in tempList[0]:
                 print(gzh)
                 if (gzh != None):
                     gzhList.append(gzh)
             page = page + 1
-            if (isEnd == True): break
+
             # #################################
             pageCount = 0
             for gzh in gzhList:
@@ -345,8 +357,9 @@ def run():
                     continue
                 else:
                     for article in article_list:  # 将文章存入titlelist
-                        title_list.append(article['title'])
+                        title_list.append(article['title'] + ' ' + article['time'])
                     write_file("./baiduspiderProject_new/baiduspider/jsonfile/sougou.json", title_list)
+            if (isEnd == True): break
     write_file("./baiduspiderProject_new/baiduspider/jsonfile/sougou.json", title_list)
 
 def write_file(path, list):

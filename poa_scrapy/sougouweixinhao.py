@@ -165,7 +165,7 @@ def get_ip():
         get_ip()
     else:
         print("可用ip个数为：%d"%len(usefulIPlist))
-        ratio = len(usefulIPlist)/20
+        ratio = len(usefulIPlist)/5
         print('==========================ip可用率:%s'%str(ratio))
         writeProxies(usefulIPlist)
     return True
@@ -216,11 +216,10 @@ def get_data(listDic, mode):  # 1公众号列表 2文章列表
     return itemList
 
 
-def get_article(gzh):
+def get_article(gzh,titleList):
     articleList = []
     deltaList = []
     maxConut = 3
-    titleList = read_file("./baiduspiderProject_new/baiduspider/jsonfile/sougou.json")
     keyword = gzh
     count = 0
     isSuccess = False
@@ -243,7 +242,7 @@ def get_article(gzh):
                 for art in itemList:
                     print(art['title'])
                     articleList.append(art)  # 存入文章列表
-                    if art['title']+" "+art['time'] not in titleList:
+                    if art['title']+"/"+art['time'] not in titleList:
                         #
                         # 增量,在此处存入消息队列
                         Kafka_fun(art)
@@ -308,8 +307,7 @@ def getKeylist():
 
 def run():
     global producer
-    #producer = KafkaProducer(bootstrap_servers=['192.168.163.184:6667'])
-    title_list = []  # 最终的文章列表
+    
     if len(read_Proxies())==0:
         if (get_ip() == False):
             print("无法获得代理")
@@ -321,11 +319,16 @@ def run():
                 {'title': '4', 'info': '44', 'time': '1', 'url': '1'},
                 {'title': '5', 'info': '55', 'time': '1', 'url': '1'}]
     keylist = getKeylist()
-    keylist = ['杨主任']
-    # gzhList = []
+    
     for key in keylist:
         # 处理公众号
+        # 首次出错处理
+        try:
+            titleList_key = read_file("./baiduspiderProject_new/baiduspider/jsonfile/sougou.json")[key]
+        except:
+            titleList_key = []
         page = 1
+        title_list = []  # 最终的文章列表
         isEnd = False  # 判断是否爬到尾页
         while (1):
             gzhList = []
@@ -350,23 +353,32 @@ def run():
                 pageCount = pageCount+1
                 #获得公众号文章
                 print('关键词：%s,爬取公众号====%s====文章，第%d页，第%d个'%(key,gzh,page-1,pageCount))
-                article_list = get_article(gzh)
+                article_list = get_article(gzh,titleList_key)
                 if(article_list==False):
                     print('失败停止停止5s=============================================')
                     time.sleep(5)#失败停止5s
                     continue
                 else:
                     for article in article_list:  # 将文章存入titlelist
-                        title_list.append(article['title'] + ' ' + article['time'])
-                    write_file("./baiduspiderProject_new/baiduspider/jsonfile/sougou.json", title_list)
+                        title_list.append(article['title'] + '/' + article['time'])
+
             if (isEnd == True): break
-    write_file("./baiduspiderProject_new/baiduspider/jsonfile/sougou.json", title_list)
+        # 字典记录数据
+        tempdic = read_dic("./baiduspiderProject_new/baiduspider/jsonfile/sougou.json")
+        tempdic.update({key: title_list})
+        write_file("./baiduspiderProject_new/baiduspider/jsonfile/sougou.json", tempdic)
 
 def write_file(path, list):
     f = open(path, "w", encoding='UTF-8')
     content = json.dumps(list, ensure_ascii=False)
     f.write(content)
     f.close()
+def read_dic(path):
+    try:
+        f = open(path, "r", encoding='UTF-8')  # 读取josn中的上次的链接
+        return json.load(f)  # 将数据存入列表
+    except:
+        return {}
 
 def read_file(path):
     try:

@@ -12,7 +12,8 @@ from oraclepool import OrclPool
 
 global producer
 
-producer = KafkaProducer(bootstrap_servers=['192.168.163.184:6667'])
+# producer = KafkaProducer(bootstrap_servers=['192.168.163.184:6667'])
+producer = KafkaProducer(bootstrap_servers=['172.16.54.139:6667'])
 
 def GetgzhList(keyword, page):
     isSucess = False
@@ -73,6 +74,23 @@ def check_ip(ips):
         print("Ip已失效:",e)
         usefulIPlist = read_Proxies()[1:]
         writeProxies(usefulIPlist)
+
+# 检测ip是否失效
+def check_ip_list(ip_list):
+    print('===================检测ip===================')
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36 Edge/15.15063'
+    }
+    # 以下测试IP
+    usefulIPlist = []
+    for ip in ip_list:
+        try:
+            requests.get("http://www.baidu.com", headers=headers, proxies=ip, timeout=2)  # 测试用网站
+            print(ip)
+            usefulIPlist.append(ip)
+        except Exception as e:
+            print(e)
+    writeProxies(usefulIPlist)
 
 # 获取免费代理
 def get_ip_free():
@@ -308,10 +326,13 @@ def getKeylist():
 def run():
     global producer
     
-    if len(read_Proxies())==0:
+    ip_list = read_Proxies()
+    if len(ip_list)==0:
         if (get_ip() == False):
             print("无法获得代理")
             return
+    else:
+        check_ip_list(ip_list)
 
     testlist = [{'title': '1', 'info': '11', 'time': '1', 'url': '1'},  # 测试用数据
                 {'title': '2', 'info': '22', 'time': '1', 'url': '1'},
@@ -319,7 +340,7 @@ def run():
                 {'title': '4', 'info': '44', 'time': '1', 'url': '1'},
                 {'title': '5', 'info': '55', 'time': '1', 'url': '1'}]
     keylist = getKeylist()
-    
+    count_art = 0
     for key in keylist:
         # 处理公众号
         # 首次出错处理
@@ -339,6 +360,7 @@ def run():
             except:
                 isEnd = True
                 break
+            count_art = count_art+1
             isEnd = tempList[1]  # 是否爬到尾页
             for gzh in tempList[0]:
                 print(gzh)
@@ -367,6 +389,8 @@ def run():
         tempdic = read_dic("./baiduspiderProject_new/baiduspider/jsonfile/sougou.json")
         tempdic.update({key: title_list})
         write_file("./baiduspiderProject_new/baiduspider/jsonfile/sougou.json", tempdic)
+    if count_art==0:
+        writeProxies([])
 
 def write_file(path, list):
     f = open(path, "w", encoding='UTF-8')

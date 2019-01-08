@@ -102,7 +102,7 @@ def get_ip_free():
     }
     ip_list = []
     try:
-        page = requests.get(url, headers=headers)
+        page = requests.get(url, headers=headers,timeout=5)
     except Exception as e:
         print("请求ip失败：",e)
         return False
@@ -148,13 +148,24 @@ def get_ip():
     }
     ip_list = []
     try:
-        zm_resp = requests.get(url)
+        zm_resp = requests.get(url,timeout=5)
         ip_json = zm_resp.text.split('\r\n')
         if len(ip_json)==1:
             print('===================付费代理ip已达上限===================')
             print(ip_json[0])
-            get_ip_free()
+            free_res = get_ip_free()
+            if free_res == True:
+                return True
+            else:
+                return False
+    except requests.exceptions.ConnectionError as e:
+        print('无法访问')
+        print(e)
+        free_res = get_ip_free()
+        if free_res == True:
             return True
+        else:
+            return False
     except Exception as e:
         print("请求ip失败:",e)
         get_ip()
@@ -325,7 +336,7 @@ def getKeylist():
 
 def run():
     global producer
-    
+    print('==================begin==================')
     ip_list = read_Proxies()
     if len(ip_list)==0:
         if (get_ip() == False):
@@ -391,6 +402,7 @@ def run():
         write_file("./baiduspiderProject_new/baiduspider/jsonfile/sougou.json", tempdic)
     if count_art==0:
         writeProxies([])
+    print('==================end==================')
 
 def write_file(path, list):
     f = open(path, "w", encoding='UTF-8')
